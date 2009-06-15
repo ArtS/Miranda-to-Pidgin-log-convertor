@@ -30,9 +30,10 @@ def get_log():
     return content[log_start:]
 
 def parse_log(content):
+    day_res = {}
     result = {}
     i  = 0
-
+    
     last_msg = {}
     for line in content:
         line = unicode(line.replace('\r\n', '').decode('cp1251', 'replace'))
@@ -45,11 +46,20 @@ def parse_log(content):
                     return line
                 else:
                     if last_msg:
-                        result[last_msg['date']] = last_msg['data']
+                        day_res[last_msg['date']] = last_msg['data']
                         
-                    last_msg = {}
-                    last_msg['date'] = datetime.strptime(line[res.start():res.end()], '%d.%m.%Y %H:%M:%S')
-                    last_msg['data'] = {'nick': line[:res.start()], 'text' : line[res.end():]}
+                    new_msg = {}
+                    new_msg['date'] = datetime.strptime(line[res.start():res.end()], '%d.%m.%Y %H:%M:%S')
+                    new_msg['data'] = {'nick': line[:res.start()], 'text' : line[res.end():]}
+
+                    if last_msg:
+                        last_day = last_msg['date'].date()
+                        if last_day != new_msg['date'].date():
+                            result[last_day] = day_res
+                            day_res = {}
+
+                    last_msg = new_msg
+
             else:
                 line = line.strip()
                 if line:
