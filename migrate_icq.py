@@ -20,14 +20,11 @@ def get_log():
         return None
 
     # find where actual log starts
-
-    tab_space = '                          '
     log_start_mark = '------------------------------------------------\r\n'
-
-    print 'looking for start'
     log_start = content.index(log_start_mark) + 1
 
     return content[log_start:]
+
 
 def parse_log(content):
     day_res = {}
@@ -72,7 +69,20 @@ def parse_log(content):
 
     return result
 
+def write_to_files(days):
+    for day, data in days.items():
+        time_keys = data.keys()
+        time_keys.sort()
+        with open('log/%s+1000EST.txt' % time_keys[0].strftime('%Y-%m-%d.%H%M%S'), 'w') as f:
+            f.write('Conversation with %s \n' % data[time_keys[0]]['nick'])
+            for msg_time, msg_data in data.items():
+                f.write('(%(time)s) %(nick)s: %(text)s \n' % {'time' : msg_time.strftime('%H:%M:%S'),
+                                                           'nick' : msg_data['nick'].strip().encode('cp1251', 'replace'),
+                                                           'text' : msg_data['text'].strip().encode('cp1251', 'replace')})
+
 content = get_log()
-parse_log(content)
+days = parse_log(content)
+write_to_files(days)
+
 
 
