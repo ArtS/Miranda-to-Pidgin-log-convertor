@@ -6,14 +6,11 @@ import re
 from datetime import datetime
 
 
-def get_log():
+def get_log(in_file):
     content = None
 
-    print 'reading'
-    for f_name in os.listdir('.'):
-        if f_name.lower().endswith('.txt'):
-            with open(f_name) as f:
-                content = f.readlines()
+    with open(in_file) as f:
+        content = f.readlines()
 
     if not content:
         print 'No text files with logs found'
@@ -33,7 +30,7 @@ def parse_log(content):
     
     last_msg = {}
     for line in content:
-        line = unicode(line.replace('\r\n', '').decode('cp1251', 'replace'))
+        line = line.replace('\r\n', '')
         if len(line) != 0:
             if line[0] != ' ':
                 # Start of the message, lets read sender name, recepient name, date and time
@@ -69,20 +66,46 @@ def parse_log(content):
 
     return result
 
-def write_to_files(days):
+def write_to_files(days, dir):
     for day, data in days.items():
         time_keys = data.keys()
         time_keys.sort()
-        with open('log/%s+1000EST.txt' % time_keys[0].strftime('%Y-%m-%d.%H%M%S'), 'w') as f:
+
+        with open('%s/%s+1000EST.txt' % 
+                  (dir, time_keys[0].strftime('%Y-%m-%d.%H%M%S')), 'w') as f:
+
             f.write('Conversation with %s \n' % data[time_keys[0]]['nick'])
             for msg_time, msg_data in data.items():
                 f.write('(%(time)s) %(nick)s: %(text)s \n' % {'time' : msg_time.strftime('%H:%M:%S'),
-                                                           'nick' : msg_data['nick'].strip().encode('cp1251', 'replace'),
-                                                           'text' : msg_data['text'].strip().encode('cp1251', 'replace')})
+                                                           'nick' : msg_data['nick'].strip(),
+                                                           'text' : msg_data['text'].strip()})
 
-content = get_log()
-days = parse_log(content)
-write_to_files(days)
+#content = get_log()
+#days = parse_log(content)
+#write_to_files(days)
+
+if len(sys.argv) != 3:
+    print '\n\tUsage: migrate_icq.py <root_dir_with_icq_logs> <target_dir_with_pidgin_icq_logs>\n'
+    sys.exit(1)
+
+input_dir = sys.argv[1]
+output_dir = sys.argv[2]
+for d, di, f in os.walk(input_dir):
+    for f_name in f:
+        if f_name.lower().endswith('.txt'):
+            source_file = os.path.join(d, f_name)
+            print 'Procesing %s' % source_file
+            uin = re.findall('/([^/]+)?$', d)[0]
+            out_uin = os.path.join(output_dir, uin)
+
+            content = get_log(source_file)
+            days = parse_log(content)
+            print 'Writing to %s' % out_uin
+            if not os.path.exists(out_uin):
+                os.mkdir(out_uin)
+            write_to_files(days, out_uin)
+
+
 
 
 
