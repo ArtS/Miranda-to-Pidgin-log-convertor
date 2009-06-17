@@ -36,7 +36,7 @@ def parse_log(content):
                 # Start of the message, lets read sender name, recepient name, date and time
                 res = re.search('\d{1,2}\.\d{1,2}\.\d{4} \d{1,2}:\d{1,2}:\d{1,2}', line)
                 if not res:
-                    print """Line %s\n%s\nin in unknown format""" % (i, line.encode('cp1251'))
+                    print """Line %s\n%s\nin in unknown format""" % (i, line.encode(ENCODING))
                     return line
                 else:
                     if last_msg:
@@ -80,16 +80,21 @@ def write_to_files(days, dir):
                                                            'nick' : msg_data['nick'].strip(),
                                                            'text' : msg_data['text'].strip()})
 
-#content = get_log()
-#days = parse_log(content)
-#write_to_files(days)
-
-if len(sys.argv) != 3:
-    print '\n\tUsage: migrate_icq.py <root_dir_with_icq_logs> <target_dir_with_pidgin_icq_logs>\n'
+if len(sys.argv) < 3:
+    print """\n\tExport Miranda logs using Message Export plugin from http://sourceforge.net/projects/msg-export"""
+    print """\tUse following format for file name in Message Export's 'Default' field: %UIN%\%year%-%month%-%day%.txt"""
+    print '\n\tUsage: migrate_icq.py <root_dir_with_icq_logs> <target_dir_with_pidgin_icq_logs> [encoding]\n'
     sys.exit(1)
+
+
+ENCODING = 'cp1251'
 
 input_dir = sys.argv[1]
 output_dir = sys.argv[2]
+
+if len(sys.argv) == 4:
+    ENCODING = sys.argv[3]
+
 for d, di, f in os.walk(input_dir):
     for f_name in f:
         if f_name.lower().endswith('.txt'):
