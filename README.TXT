@@ -3,6 +3,6 @@ Use following format for file name in Message Export's 'Default' field: %UIN%\%y
 
 Second, run this tool:
 
-     migrate_icq.py <root_dir_with_icq_logs> <target_dir_with_pidgin_icq_logs> [encoding]\n'
+     migrate_icq.py <root_dir_with_icq_logs> <target_dir_with_pidgin_icq_logs> [encoding]
 
 
