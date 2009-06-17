@@ -80,35 +80,39 @@ def write_to_files(days, dir):
                                                            'nick' : msg_data['nick'].strip(),
                                                            'text' : msg_data['text'].strip()})
 
-if len(sys.argv) < 3:
-    print """\n\tExport Miranda logs using Message Export plugin from http://sourceforge.net/projects/msg-export"""
-    print """\tUse following format for file name in Message Export's 'Default' field: %UIN%\%year%-%month%-%day%.txt"""
-    print '\n\tUsage: migrate_icq.py <root_dir_with_miranda_logs> <target_dir_with_pidgin_icq_logs> [encoding]\n'
-    sys.exit(1)
-
-
 ENCODING = 'cp1251'
 
-input_dir = sys.argv[1]
-output_dir = sys.argv[2]
+def main():
+    if len(sys.argv) < 3:
+        print """\n\tExport Miranda logs using Message Export plugin from http://sourceforge.net/projects/msg-export"""
+        print """\tUse following format for file name in Message Export's 'Default' field: %UIN%\%year%-%month%-%day%.txt"""
+        print '\n\tUsage: migrate_icq.py <root_dir_with_miranda_logs> <target_dir_with_pidgin_icq_logs> [encoding]\n'
+        sys.exit(1)
 
-if len(sys.argv) == 4:
-    ENCODING = sys.argv[3]
+    input_dir = sys.argv[1]
+    output_dir = sys.argv[2]
 
-for d, di, f in os.walk(input_dir):
-    for f_name in f:
-        if f_name.lower().endswith('.txt'):
-            source_file = os.path.join(d, f_name)
-            print 'Procesing %s' % source_file
-            uin = re.findall('/([^/]+)?$', d)[0]
-            out_uin = os.path.join(output_dir, uin)
+    if len(sys.argv) == 4:
+        ENCODING = sys.argv[3]
 
-            content = get_log(source_file)
-            days = parse_log(content)
-            print 'Writing to %s' % out_uin
-            if not os.path.exists(out_uin):
-                os.mkdir(out_uin)
-            write_to_files(days, out_uin)
+    for d, di, f in os.walk(input_dir):
+        for f_name in f:
+            if f_name.lower().endswith('.txt'):
+                source_file = os.path.join(d, f_name)
+                print 'Procesing %s' % source_file
+                uin = re.findall('/([^/]+)?$', d)[0]
+                out_uin = os.path.join(output_dir, uin)
+
+                content = get_log(source_file)
+                days = parse_log(content)
+                print 'Writing to %s' % out_uin
+                if not os.path.exists(out_uin):
+                    os.mkdir(out_uin)
+                write_to_files(days, out_uin)
+
+
+if __name__ == "__main__":
+    main()
 
 
 
