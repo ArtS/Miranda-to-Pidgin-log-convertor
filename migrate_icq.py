@@ -83,7 +83,7 @@ def write_to_files(days, dir):
 if len(sys.argv) < 3:
     print """\n\tExport Miranda logs using Message Export plugin from http://sourceforge.net/projects/msg-export"""
     print """\tUse following format for file name in Message Export's 'Default' field: %UIN%\%year%-%month%-%day%.txt"""
-    print '\n\tUsage: migrate_icq.py <root_dir_with_icq_logs> <target_dir_with_pidgin_icq_logs> [encoding]\n'
+    print '\n\tUsage: migrate_icq.py <root_dir_with_miranda_logs> <target_dir_with_pidgin_icq_logs> [encoding]\n'
     sys.exit(1)
 
 
