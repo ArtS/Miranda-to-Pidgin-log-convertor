@@ -58,7 +58,7 @@ def parse_log(content):
                 line = line.strip()
                 if line:
                     last = last_msg['data']
-                    last['text'] = last['text'] + '\r\n' + line.strip()
+                    last['text'] = last['text'] + '\n' + line.strip()
 
                 #print i, len(line.strip())
 
@@ -67,33 +67,53 @@ def parse_log(content):
     return result
 
 def write_to_files(days, dir):
+
+    global MYNICKNAMES
+
     for day, data in days.items():
         time_keys = data.keys()
         time_keys.sort()
-
+        
+        recipient = ''
         with open('%s/%s+1000EST.txt' % 
                   (dir, time_keys[0].strftime('%Y-%m-%d.%H%M%S')), 'w') as f:
 
-            f.write('Conversation with %s \n' % data[time_keys[0]]['nick'])
-            for msg_time, msg_data in data.items():
-                f.write('(%(time)s) %(nick)s: %(text)s \n' % {'time' : msg_time.strftime('%H:%M:%S'),
-                                                           'nick' : msg_data['nick'].strip(),
-                                                           'text' : msg_data['text'].strip()})
+            day_keys = data.keys()
+            day_keys.sort()
 
+            str_out = ''
+            for msg_time in day_keys:
+                message = {'time' : msg_time.strftime('%H:%M:%S'),
+                           'nick' : data[msg_time]['nick'].strip(),
+                           'text' : data[msg_time]['text'].strip()}
+
+                if message['nick'] not in MYNICKNAMES:
+                    recipient = message['nick']
+
+                str_out += '(%(time)s) %(nick)s: %(text)s \n' % message
+        
+            f.write('Conversation with %s\n' % recipient)
+            f.write(str_out)
+
+MYNICKNAMES = ()
 ENCODING = 'cp1251'
 
 def main():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         print """\n\tExport Miranda logs using Message Export plugin from http://sourceforge.net/projects/msg-export"""
         print """\tUse following format for file name in Message Export's 'Default' field: %UIN%\%year%-%month%-%day%.txt"""
-        print '\n\tUsage: migrate_icq.py <root_dir_with_miranda_logs> <target_dir_with_pidgin_icq_logs> [encoding]\n'
+        print """\n\tUsage: migrate_icq.py <root_dir_with_miranda_logs> <target_dir_with_pidgin_icq_logs> <my_nick_names_separated_by ':' >[encoding]"""
+        print """\n\tExample: migrate_icq.py ~/miranda_export ~/.purple/logs/icq/12345678 SuperHero:MrBlack\n"""
         sys.exit(1)
 
     input_dir = sys.argv[1]
     output_dir = sys.argv[2]
 
-    if len(sys.argv) == 4:
-        ENCODING = sys.argv[3]
+    global MYNICKNAMES
+    MYNICKNAMES = sys.argv[3].split(':')
+
+    if len(sys.argv) == 5:
+        ENCODING = sys.argv[4]
 
     for d, di, f in os.walk(input_dir):
         for f_name in f:
@@ -113,8 +133,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
 
